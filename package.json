@@ -1,0 +1,14 @@
+{
+  "name": "userinfobot",
+  "version": "1.0.0",
+  "description": "Telegram bot that shows your own account info (ID, username, name, language, premium status) in EN/UZ/RU",
+  "main": "index.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "telegraf": "^4.16.3",
+    "dotenv": "^16.4.5"
+  }
+}
