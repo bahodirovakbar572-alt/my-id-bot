@@ -145,9 +145,45 @@ bot.catch((err, ctx) => {
   console.error("Bot error:", err);
 });
 
-bot.launch().then(() => {
-  console.log("✅ Bot ishga tushdi (started)");
+// --- PORT / Webhook setup ---
+// Ko'p hosting xizmatlari (Render, Railway, Heroku va h.k.) bot doim ishlab
+// turishi uchun ochiq PORT talab qiladi. Bu yerda 2 xil rejim bor:
+//
+// 1) WEBHOOK_URL .env faylida berilgan bo'lsa -> webhook + Express server
+//    PORT'da ko'tariladi (hosting buni talab qiladi).
+// 2) WEBHOOK_URL berilmagan bo'lsa -> oddiy polling rejimi ishlaydi
+//    (lokal kompyuterda test qilish uchun qulay), lekin baribir PORT'da
+//    "tirik" ekanini ko'rsatadigan kichik server ham ko'tariladi
+//    (Render kabi hostinglar PORT ochilishini talab qiladi).
+
+const PORT = process.env.PORT || 3000;
+const WEBHOOK_URL = process.env.WEBHOOK_URL; // masalan: https://sizning-domain.com
+
+const express = require("express");
+const app = express();
+
+app.get("/", (req, res) => {
+  res.send("✅ UserInfoBot ishlayapti / is running");
 });
+
+if (WEBHOOK_URL) {
+  const webhookPath = `/webhook/${BOT_TOKEN}`;
+  app.use(bot.webhookCallback(webhookPath));
+
+  app.listen(PORT, async () => {
+    await bot.telegram.setWebhook(`${WEBHOOK_URL}${webhookPath}`);
+    console.log(`✅ Webhook o'rnatildi: ${WEBHOOK_URL}${webhookPath}`);
+    console.log(`✅ Server PORT=${PORT} da ishga tushdi`);
+  });
+} else {
+  app.listen(PORT, () => {
+    console.log(`✅ Server PORT=${PORT} da ishga tushdi (faqat "tirik" ko'rsatish uchun)`);
+  });
+
+  bot.launch().then(() => {
+    console.log("✅ Bot polling rejimida ishga tushdi (started)");
+  });
+}
 
 process.once("SIGINT", () => bot.stop("SIGINT"));
 process.once("SIGTERM", () => bot.stop("SIGTERM"));
