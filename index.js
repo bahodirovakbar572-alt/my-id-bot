@@ -177,7 +177,7 @@ if (WEBHOOK_URL) {
   });
 } else {
   app.listen(PORT, () => {
-    console.log(`✅ Server PORT=${PORT} da ishga tushdi (faqat "tirik" ko'rsatish uchun)`);
+    console.log(`http://localhost:${PORT}`);
   });
 
   bot.launch().then(() => {
